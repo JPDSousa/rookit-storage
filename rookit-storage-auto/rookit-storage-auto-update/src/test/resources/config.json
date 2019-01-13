@@ -1,0 +1,23 @@
+{
+  "basePackage": "org.rookit",
+  "filter": {
+    "parameterName": "I",
+    "basePackage": "api.storage.filter",
+    "entitySuffix": "Filter",
+    "methodPrefix": "with",
+    "partialEntityPrefix": "Generic"
+  },
+  "updateFilter": {
+    "parameterName": "P",
+    "basePackage": "api.storage.update.filter",
+    "entitySuffix": "UpdateFilterQuery",
+    "partialEntityPrefix": "Generic"
+  },
+  "update": {
+    "parameterName": "U",
+    "basePackage": "api.storage.update",
+    "entitySuffix": "UpdateQuery",
+    "partialEntityPrefix": "Generic",
+    "methodPrefix": "set"
+  }
+}

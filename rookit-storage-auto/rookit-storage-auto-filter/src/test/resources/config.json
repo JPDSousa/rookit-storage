@@ -1,0 +1,10 @@
+{
+  "basePackage": "org.rookit",
+  "filter": {
+    "parameterName": "I",
+    "basePackage": "api.storage.filter",
+    "entitySuffix": "Filter",
+    "methodPrefix": "with",
+    "partialEntityPrefix": "Generic"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "basePackage": "org.rookit",
+  "filter": {
+    "parameterName": "I",
+    "basePackage": "api.storage.filter",
+    "entitySuffix": "Filter",
+    "methodPrefix": "with",
+    "partialEntityPrefix": "Generic"
+  },
+  "query": {
+    "parameterName": "Q",
+    "elementParameterName": "E",
+    "basePackage": "api.storage.query",
+    "entitySuffix": "Query",
+    "methodPrefix": "with",
+    "partialEntityPrefix": "Generic"
+  },
+  "updateFilter": {
+    "parameterName": "P",
+    "basePackage": "api.storage.update.filter",
+    "entitySuffix": "UpdateFilterQuery",
+    "partialEntityPrefix": "Generic"
+  }
+}
