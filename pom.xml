@@ -16,6 +16,13 @@
         <module>rookit-storage-api</module>
         <module>rookit-storage-auto</module>
     </modules>
+	
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
 
 </project>
