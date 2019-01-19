@@ -32,6 +32,7 @@ import org.rookit.auto.entity.BaseEntityFactory;
 import org.rookit.auto.entity.BasePartialEntityFactory;
 import org.rookit.auto.entity.EntityFactory;
 import org.rookit.auto.entity.PartialEntityFactory;
+import org.rookit.auto.entity.parent.ParentExtractor;
 import org.rookit.auto.identifier.BaseEntityIdentifierFactory;
 import org.rookit.auto.identifier.EntityIdentifierFactory;
 import org.rookit.auto.javapoet.method.MethodFactory;
@@ -75,6 +76,8 @@ public final class SourceModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(EntityFactory.class).to(Key.get(EntityFactory.class, FilterBase.class)).in(Singleton.class);
+        bind(PartialEntityFactory.class).to(Key.get(PartialEntityFactory.class, PartialFilter.class))
+                .in(Singleton.class);
         bind(PartialEntityFactory.class).annotatedWith(PartialFilter.class)
                 .to(Key.get(PartialEntityFactory.class, FilterBase.class)).in(Singleton.class);
     }
@@ -100,8 +103,9 @@ public final class SourceModule extends AbstractModule {
     @FilterBase
     PartialEntityFactory filterPartialEntityFactory(@PartialFilter final EntityIdentifierFactory identifierFactory,
                                                     @PartialFilter final SingleTypeSourceFactory typeSpecFactory,
-                                                    final OptionalFactory optionalFactory) {
-        return BasePartialEntityFactory.create(identifierFactory, typeSpecFactory, optionalFactory);
+                                                    final OptionalFactory optionalFactory,
+                                                    final ParentExtractor extractor) {
+        return BasePartialEntityFactory.create(identifierFactory, typeSpecFactory, optionalFactory, extractor);
     }
 
     @Provides

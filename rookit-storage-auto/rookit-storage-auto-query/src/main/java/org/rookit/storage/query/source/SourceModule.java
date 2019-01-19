@@ -22,15 +22,20 @@
 package org.rookit.storage.query.source;
 
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.util.Modules;
 import com.squareup.javapoet.TypeVariableName;
 import org.rookit.auto.entity.BaseEntityFactory;
+import org.rookit.auto.entity.BasePartialEntityFactory;
 import org.rookit.auto.entity.EntityFactory;
+import org.rookit.auto.entity.PartialEntityFactory;
+import org.rookit.auto.entity.lazy.LazyPartialEntityFactory;
 import org.rookit.auto.entity.nowrite.NoWriteEntityFactory;
 import org.rookit.auto.entity.nowrite.NoWritePartialEntityFactory;
-import org.rookit.auto.entity.PartialEntityFactory;
+import org.rookit.auto.entity.parent.MultiFactoryParentExtractor;
+import org.rookit.auto.entity.parent.ParentExtractor;
 import org.rookit.auto.guice.Self;
 import org.rookit.auto.identifier.BaseEntityIdentifierFactory;
 import org.rookit.auto.identifier.EntityIdentifierFactory;
@@ -53,6 +58,7 @@ import org.rookit.storage.utils.config.QueryConfig;
 import org.rookit.storage.utils.filter.Filter;
 import org.rookit.storage.utils.filter.FilterBase;
 import org.rookit.storage.utils.filter.PartialFilter;
+import org.rookit.utils.optional.OptionalFactory;
 import org.rookit.utils.primitive.VoidUtils;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -78,9 +84,6 @@ public final class SourceModule extends AbstractNamingModule {
         bindNaming(PartialQuery.class);
         bindNaming(Query.class);
 
-        bind(PartialEntityFactory.class)
-                .to(QueryPartialEntityFactory.class).in(Singleton.class);
-
         bind(JavaPoetParameterResolver.class).annotatedWith(PartialQuery.class)
                 .to(QueryJavaPoetPartialParameterResolver.class).in(Singleton.class);
         bind(JavaPoetParameterResolver.class).annotatedWith(QueryFilter.class)
@@ -88,6 +91,24 @@ public final class SourceModule extends AbstractNamingModule {
 
         bind(SingleTypeSourceFactory.class).annotatedWith(PartialQuery.class).to(QueryPartialTypeSourceFactory.class)
                 .in(Singleton.class);
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened") // intentional due to guice
+    @Provides
+    @Singleton
+    @Filter
+    ParentExtractor extractor(final Provider<PartialEntityFactory> thisFactory,
+                              @Filter final EntityFactory filterEntityFactory) {
+        return MultiFactoryParentExtractor.create(LazyPartialEntityFactory.create(thisFactory), filterEntityFactory);
+    }
+
+    @Provides
+    @Singleton
+    PartialEntityFactory create(@PartialQuery final EntityIdentifierFactory identifierFactory,
+                                @PartialQuery final SingleTypeSourceFactory typeSpecFactory,
+                                @Filter final ParentExtractor extractor,
+                                final OptionalFactory optionalFactory) {
+        return BasePartialEntityFactory.create(identifierFactory, typeSpecFactory, optionalFactory, extractor);
     }
 
     @Singleton

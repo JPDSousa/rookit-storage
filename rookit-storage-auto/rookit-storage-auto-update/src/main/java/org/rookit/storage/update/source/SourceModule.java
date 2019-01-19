@@ -30,6 +30,7 @@ import org.rookit.auto.entity.BaseEntityFactory;
 import org.rookit.auto.entity.BasePartialEntityFactory;
 import org.rookit.auto.entity.EntityFactory;
 import org.rookit.auto.entity.PartialEntityFactory;
+import org.rookit.auto.entity.parent.ParentExtractor;
 import org.rookit.auto.identifier.BaseEntityIdentifierFactory;
 import org.rookit.auto.identifier.EntityIdentifierFactory;
 import org.rookit.auto.javapoet.naming.JavaPoetNamingFactory;
@@ -83,8 +84,9 @@ public final class SourceModule extends AbstractNamingModule {
     @Singleton
     PartialEntityFactory updatePartialEntityFactory(@PartialUpdate final EntityIdentifierFactory identifierFactory,
                                                     @PartialUpdate final SingleTypeSourceFactory typeSourceFactory,
-                                                    final OptionalFactory optionalFactory) {
-        return BasePartialEntityFactory.create(identifierFactory, typeSourceFactory, optionalFactory);
+                                                    final OptionalFactory optionalFactory,
+                                                    final ParentExtractor extractor) {
+        return BasePartialEntityFactory.create(identifierFactory, typeSourceFactory, optionalFactory, extractor);
     }
 
     @Provides

@@ -22,15 +22,20 @@
 package org.rookit.storage.update.filter.source;
 
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.util.Modules;
 import com.squareup.javapoet.TypeVariableName;
 import org.rookit.auto.entity.BaseEntityFactory;
+import org.rookit.auto.entity.BasePartialEntityFactory;
 import org.rookit.auto.entity.EntityFactory;
+import org.rookit.auto.entity.PartialEntityFactory;
+import org.rookit.auto.entity.lazy.LazyPartialEntityFactory;
 import org.rookit.auto.entity.nowrite.NoWriteEntityFactory;
 import org.rookit.auto.entity.nowrite.NoWritePartialEntityFactory;
-import org.rookit.auto.entity.PartialEntityFactory;
+import org.rookit.auto.entity.parent.MultiFactoryParentExtractor;
+import org.rookit.auto.entity.parent.ParentExtractor;
 import org.rookit.auto.identifier.BaseEntityIdentifierFactory;
 import org.rookit.auto.identifier.EntityIdentifierFactory;
 import org.rookit.auto.javapoet.naming.JavaPoetNamingFactory;
@@ -51,6 +56,7 @@ import org.rookit.storage.utils.config.UpdateFilterConfig;
 import org.rookit.storage.utils.filter.Filter;
 import org.rookit.storage.utils.filter.FilterBase;
 import org.rookit.storage.utils.filter.PartialFilter;
+import org.rookit.utils.optional.OptionalFactory;
 import org.rookit.utils.primitive.VoidUtils;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -77,9 +83,23 @@ public final class SourceModule extends AbstractNamingModule {
         bindNaming(PartialUpdateFilter.class);
         bind(SingleTypeSourceFactory.class).annotatedWith(PartialUpdateFilter.class)
                 .to(UpdateFilterPartialTypeSourceFactory.class).in(Singleton.class);
+    }
 
-        bind(PartialEntityFactory.class)
-                .to(UpdateFilterPartialEntityFactory.class).in(Singleton.class);
+    @Provides
+    @Singleton
+    @PartialFilter
+    ParentExtractor parentExtractor(@PartialFilter final PartialEntityFactory filterFactory,
+                                    final Provider<PartialEntityFactory> partialEntityFactory) {
+        return MultiFactoryParentExtractor.create(LazyPartialEntityFactory.create(partialEntityFactory), filterFactory);
+    }
+
+    @Provides
+    @Singleton
+    PartialEntityFactory partialEntityFactory(@PartialUpdateFilter final EntityIdentifierFactory identifierFactory,
+                                              @PartialUpdateFilter final SingleTypeSourceFactory typeSourceFactory,
+                                              @PartialFilter final ParentExtractor extractor,
+                                              final OptionalFactory optionalFactory) {
+        return BasePartialEntityFactory.create(identifierFactory, typeSourceFactory, optionalFactory, extractor);
     }
 
     @Singleton
