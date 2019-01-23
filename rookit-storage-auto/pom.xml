@@ -17,6 +17,8 @@
         <module>rookit-storage-auto-utils</module>
         <module>rookit-storage-auto-update-filter</module>
         <module>rookit-storage-auto-update</module>
+        <module>rookit-storage-auto-api</module>
+        <module>rookit-storage-auto-lib</module>
     </modules>
 
 </project>

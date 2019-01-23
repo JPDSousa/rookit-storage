@@ -23,19 +23,21 @@ package org.rookit.storage.filter.source.config;
 
 import com.squareup.javapoet.TypeVariableName;
 import org.rookit.auto.naming.PackageReference;
-import org.rookit.auto.naming.PackageReferenceFactory;
 import org.rookit.config.Configuration;
-import org.rookit.storage.utils.config.FilterConfig;
+import org.rookit.storage.api.config.FilterConfig;
 
 final class FilterConfigImpl implements FilterConfig {
 
     private final Configuration configuration;
-    private final PackageReferenceFactory packageFactory;
+    private final PackageReference basePackage;
+    private final String partialEntityPrefix;
 
     FilterConfigImpl(final Configuration configuration,
-                     final PackageReferenceFactory packageFactory) {
+                     final PackageReference basePackage,
+                     final String partialEntityPrefix) {
         this.configuration = configuration;
-        this.packageFactory = packageFactory;
+        this.basePackage = basePackage;
+        this.partialEntityPrefix = partialEntityPrefix;
     }
 
     @Override
@@ -45,7 +47,7 @@ final class FilterConfigImpl implements FilterConfig {
 
     @Override
     public PackageReference basePackage() {
-        return this.packageFactory.create(this.configuration.getString("basePackage"));
+        return this.basePackage.resolve(this.configuration.getString("basePackage"));
     }
 
     @Override
@@ -55,7 +57,7 @@ final class FilterConfigImpl implements FilterConfig {
 
     @Override
     public String partialEntityPrefix() {
-        return this.configuration.getString("partialEntityPrefix");
+        return this.partialEntityPrefix;
     }
 
     @Override
@@ -72,7 +74,8 @@ final class FilterConfigImpl implements FilterConfig {
     public String toString() {
         return "FilterConfigImpl{" +
                 "configuration=" + this.configuration +
-                ", packageFactory=" + this.packageFactory +
+                ", basePackage=" + this.basePackage +
+                ", partialEntityPrefix='" + this.partialEntityPrefix + '\'' +
                 "}";
     }
 }

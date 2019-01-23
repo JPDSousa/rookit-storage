@@ -19,38 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.rookit.storage.update.filter.source.config;
+package org.rookit.storage.api.config;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import org.rookit.auto.config.AutoConfig;
+import com.squareup.javapoet.TypeVariableName;
 import org.rookit.auto.config.ProcessorConfig;
-import org.rookit.auto.naming.PackageReferenceFactory;
-import org.rookit.storage.api.config.UpdateFilterConfig;
+import org.rookit.auto.naming.PackageReference;
 
-@SuppressWarnings("MethodMayBeStatic")
-public final class ConfigurationModule extends AbstractModule {
+public interface UpdateConfig extends ProcessorConfig {
 
-    private static final Module MODULE = new ConfigurationModule();
+    TypeVariableName parameterName();
 
-    public static Module getModule() {
-        return MODULE;
-    }
+    PackageReference basePackage();
 
-    private ConfigurationModule() {}
+    String entitySuffix();
 
-    @Override
-    protected void configure() {
-        bind(ProcessorConfig.class).to(ProcessorConfigImpl.class).in(Singleton.class);
-    }
+    String partialEntityPrefix();
 
-    @Provides
-    @Singleton
-    UpdateFilterConfig updateFilterConfig(final AutoConfig config,
-                                          final PackageReferenceFactory packageFactory) {
-        return new UpdateFilterConfigImpl(config.getProcessorConfig("updateFilter"), packageFactory);
-    }
-
+    String methodPrefix();
 }

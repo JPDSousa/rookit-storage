@@ -52,7 +52,7 @@ import org.rookit.auto.source.SingleTypeSourceFactory;
 import org.rookit.storage.update.filter.source.config.ConfigurationModule;
 import org.rookit.storage.utils.PartialUpdateFilter;
 import org.rookit.storage.utils.UpdateFilter;
-import org.rookit.storage.utils.config.UpdateFilterConfig;
+import org.rookit.storage.api.config.UpdateFilterConfig;
 import org.rookit.storage.utils.filter.Filter;
 import org.rookit.storage.utils.filter.FilterBase;
 import org.rookit.storage.utils.filter.PartialFilter;

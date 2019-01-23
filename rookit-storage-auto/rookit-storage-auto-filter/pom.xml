@@ -15,7 +15,15 @@
     <dependencies>
         <dependency>
             <groupId>${rookit.group}</groupId>
+            <artifactId>rookit-storage-auto-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${rookit.group}</groupId>
             <artifactId>rookit-auto-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${rookit.group}</groupId>
+            <artifactId>rookit-storage-auto-lib</artifactId>
         </dependency>
         <dependency>
             <groupId>${rookit.group}</groupId>
@@ -32,7 +40,17 @@
         <dependencies>
             <dependency>
                 <groupId>${rookit.group}</groupId>
+                <artifactId>rookit-storage-auto-api</artifactId>
+                <version>${rookit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${rookit.group}</groupId>
                 <artifactId>rookit-auto-lib</artifactId>
+                <version>${rookit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${rookit.group}</groupId>
+                <artifactId>rookit-storage-auto-lib</artifactId>
                 <version>${rookit.version}</version>
             </dependency>
             <dependency>

@@ -28,7 +28,7 @@ import com.google.inject.Singleton;
 import org.rookit.auto.config.AutoConfig;
 import org.rookit.auto.config.ProcessorConfig;
 import org.rookit.auto.naming.PackageReferenceFactory;
-import org.rookit.storage.utils.config.QueryConfig;
+import org.rookit.storage.api.config.QueryConfig;
 
 @SuppressWarnings("MethodMayBeStatic")
 public final class ConfigurationModule extends AbstractModule {

@@ -19,22 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.rookit.storage.utils.config;
+package org.rookit.storage.lib.config;
 
-import com.squareup.javapoet.TypeVariableName;
-import org.rookit.auto.config.ProcessorConfig;
-import org.rookit.auto.naming.PackageReference;
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import org.rookit.auto.config.AutoConfig;
+import org.rookit.auto.naming.PackageReferenceFactory;
+import org.rookit.storage.api.config.StorageConfig;
 
-public interface FilterConfig extends ProcessorConfig {
+public final class StorageModule extends AbstractModule {
 
-    TypeVariableName parameterName();
+    private static final Module MODULE = new StorageModule();
 
-    PackageReference basePackage();
+    public static Module getModule() {
+        return MODULE;
+    }
 
-    String entitySuffix();
+    private StorageModule() {}
 
-    String partialEntityPrefix();
+    @Override
+    protected void configure() {
 
-    String methodPrefix();
+    }
 
+    @Provides
+    @Singleton
+    static StorageConfig storageConfig(final AutoConfig config, final PackageReferenceFactory referenceFactory) {
+        return new StorageConfigImpl(config.getProcessorConfig("storage"), referenceFactory);
+    }
 }

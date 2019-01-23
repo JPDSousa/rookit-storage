@@ -28,7 +28,7 @@ import org.rookit.auto.javapoet.naming.JavaPoetNamingFactory;
 import org.rookit.auto.naming.AbstractNamingModule;
 import org.rookit.auto.naming.BaseJavaPoetNamingFactory;
 import org.rookit.auto.naming.PackageReference;
-import org.rookit.storage.utils.config.FilterConfig;
+import org.rookit.storage.api.config.FilterConfig;
 import org.rookit.storage.utils.filter.Filter;
 import org.rookit.storage.utils.filter.PartialFilter;
 

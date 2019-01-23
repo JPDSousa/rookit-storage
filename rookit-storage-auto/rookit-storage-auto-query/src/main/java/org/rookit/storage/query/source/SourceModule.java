@@ -54,7 +54,7 @@ import org.rookit.storage.utils.ElementQuery;
 import org.rookit.storage.utils.PartialQuery;
 import org.rookit.storage.utils.Query;
 import org.rookit.storage.utils.QueryFilter;
-import org.rookit.storage.utils.config.QueryConfig;
+import org.rookit.storage.api.config.QueryConfig;
 import org.rookit.storage.utils.filter.Filter;
 import org.rookit.storage.utils.filter.FilterBase;
 import org.rookit.storage.utils.filter.PartialFilter;

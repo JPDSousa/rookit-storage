@@ -23,8 +23,8 @@ package org.rookit.storage.query.source.config;
 
 import com.google.inject.Inject;
 import org.rookit.auto.config.ProcessorConfig;
-import org.rookit.storage.utils.config.FilterConfig;
-import org.rookit.storage.utils.config.QueryConfig;
+import org.rookit.storage.api.config.FilterConfig;
+import org.rookit.storage.api.config.QueryConfig;
 
 import javax.annotation.processing.Messager;
 import javax.tools.Diagnostic;

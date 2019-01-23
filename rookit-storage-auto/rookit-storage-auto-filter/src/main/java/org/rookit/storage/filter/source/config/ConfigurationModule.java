@@ -25,10 +25,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.rookit.auto.config.AutoConfig;
 import org.rookit.auto.config.ProcessorConfig;
-import org.rookit.auto.naming.PackageReferenceFactory;
-import org.rookit.storage.utils.config.FilterConfig;
+import org.rookit.storage.api.config.FilterConfig;
+import org.rookit.storage.api.config.StorageConfig;
 
 @SuppressWarnings("MethodMayBeStatic")
 public final class ConfigurationModule extends AbstractModule {
@@ -48,8 +47,12 @@ public final class ConfigurationModule extends AbstractModule {
 
     @Provides
     @Singleton
-    FilterConfig filterConfig(final AutoConfig autoConfig, final PackageReferenceFactory packageFactory) {
-        return new FilterConfigImpl(autoConfig.getProcessorConfig("filter"), packageFactory);
+    FilterConfig filterConfig(final StorageConfig config) {
+        return new FilterConfigImpl(
+                dependencies, config.getProcessorConfig("filter"),
+                config.basePackage(),
+                config.partialEntityPrefix()
+        );
     }
 
 }

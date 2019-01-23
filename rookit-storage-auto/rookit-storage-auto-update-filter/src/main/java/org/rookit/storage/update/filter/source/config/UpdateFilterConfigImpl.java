@@ -25,7 +25,7 @@ import com.squareup.javapoet.TypeVariableName;
 import org.rookit.auto.naming.PackageReference;
 import org.rookit.auto.naming.PackageReferenceFactory;
 import org.rookit.config.Configuration;
-import org.rookit.storage.utils.config.UpdateFilterConfig;
+import org.rookit.storage.api.config.UpdateFilterConfig;
 
 final class UpdateFilterConfigImpl implements UpdateFilterConfig {
 

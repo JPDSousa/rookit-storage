@@ -19,21 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.rookit.storage.utils.config;
+package org.rookit.storage.lib.config;
 
-import com.squareup.javapoet.TypeVariableName;
-import org.rookit.auto.config.ProcessorConfig;
 import org.rookit.auto.naming.PackageReference;
+import org.rookit.auto.naming.PackageReferenceFactory;
+import org.rookit.config.Configuration;
+import org.rookit.storage.api.config.StorageConfig;
 
-public interface UpdateConfig extends ProcessorConfig {
+final class StorageConfigImpl implements StorageConfig {
 
-    TypeVariableName parameterName();
+    private final Configuration configuration;
+    private final PackageReferenceFactory referenceFactory;
 
-    PackageReference basePackage();
+    StorageConfigImpl(final Configuration configuration, final PackageReferenceFactory referenceFactory) {
+        this.configuration = configuration;
+        this.referenceFactory = referenceFactory;
+    }
 
-    String entitySuffix();
+    @Override
+    public PackageReference basePackage() {
+        return this.referenceFactory.create(this.configuration.getString("basePackage"));
+    }
 
-    String partialEntityPrefix();
+    @Override
+    public String partialEntityPrefix() {
+        return this.configuration.getString("partialEntityPrefix");
+    }
 
-    String methodPrefix();
+    @Override
+    public Configuration getProcessorConfig(final String name) {
+        return this.configuration.getConfig(name);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.configuration.getBoolean("enabled");
+    }
+
+    @Override
+    public String toString() {
+        return "StorageConfigImpl{" +
+                "configuration=" + this.configuration +
+                ", referenceFactory=" + this.referenceFactory +
+                "}";
+    }
 }

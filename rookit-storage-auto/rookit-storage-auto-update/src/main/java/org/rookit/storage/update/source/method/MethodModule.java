@@ -48,7 +48,7 @@ import org.rookit.storage.utils.TopUpdate;
 import org.rookit.storage.utils.Update;
 import org.rookit.storage.utils.UpdateEntity;
 import org.rookit.storage.utils.UpdateProperty;
-import org.rookit.storage.utils.config.UpdateConfig;
+import org.rookit.storage.api.config.UpdateConfig;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.util.Types;

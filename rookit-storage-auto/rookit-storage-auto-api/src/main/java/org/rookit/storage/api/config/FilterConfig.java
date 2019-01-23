@@ -19,17 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.rookit.storage.utils.config;
+package org.rookit.storage.api.config;
 
 import com.squareup.javapoet.TypeVariableName;
 import org.rookit.auto.config.ProcessorConfig;
 import org.rookit.auto.naming.PackageReference;
 
-public interface QueryConfig extends ProcessorConfig {
+public interface FilterConfig extends ProcessorConfig {
 
     TypeVariableName parameterName();
-
-    TypeVariableName elementParameterName();
 
     PackageReference basePackage();
 

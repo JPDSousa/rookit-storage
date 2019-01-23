@@ -48,7 +48,7 @@ import org.rookit.storage.update.source.method.MethodModule;
 import org.rookit.storage.utils.PartialUpdate;
 import org.rookit.storage.utils.Update;
 import org.rookit.storage.utils.UpdateFilter;
-import org.rookit.storage.utils.config.UpdateConfig;
+import org.rookit.storage.api.config.UpdateConfig;
 import org.rookit.utils.optional.OptionalFactory;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
