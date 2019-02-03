@@ -30,10 +30,14 @@ final class StorageConfigImpl implements StorageConfig {
 
     private final Configuration configuration;
     private final PackageReferenceFactory referenceFactory;
+    private final String name;
 
-    StorageConfigImpl(final Configuration configuration, final PackageReferenceFactory referenceFactory) {
+    StorageConfigImpl(final Configuration configuration,
+                      final PackageReferenceFactory referenceFactory,
+                      final String name) {
         this.configuration = configuration;
         this.referenceFactory = referenceFactory;
+        this.name = name;
     }
 
     @Override
@@ -52,6 +56,11 @@ final class StorageConfigImpl implements StorageConfig {
     }
 
     @Override
+    public String name() {
+        return this.name;
+    }
+
+    @Override
     public boolean isEnabled() {
         return this.configuration.getBoolean("enabled");
     }
@@ -61,6 +70,7 @@ final class StorageConfigImpl implements StorageConfig {
         return "StorageConfigImpl{" +
                 "configuration=" + this.configuration +
                 ", referenceFactory=" + this.referenceFactory +
+                ", name='" + this.name + '\'' +
                 "}";
     }
 }

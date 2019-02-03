@@ -47,6 +47,7 @@ public final class StorageModule extends AbstractModule {
     @Provides
     @Singleton
     static StorageConfig storageConfig(final AutoConfig config, final PackageReferenceFactory referenceFactory) {
-        return new StorageConfigImpl(config.getProcessorConfig("storage"), referenceFactory);
+        final String name = "storage";
+        return new StorageConfigImpl(config.getProcessorConfig(name), referenceFactory, name);
     }
 }
