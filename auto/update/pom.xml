@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.github.JPDSousa.rookit-storage</groupId>
+        <artifactId>auto</artifactId>
+        <version>-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>auto-update</artifactId>
+
+    <name>Rookit Storage Auto Update</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>${rookit.group}.rookit-storage</groupId>
+            <artifactId>auto-update-filter</artifactId>
+        </dependency>
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>${rookit.group}.rookit-auto</groupId>
+            <artifactId>test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${rookit.group}.rookit-storage</groupId>
+                <artifactId>auto-update-filter</artifactId>
+                <version>${rookit.version}</version>
+            </dependency>
+            <!-- Test dependencies -->
+            <dependency>
+                <groupId>${rookit.group}.rookit-auto</groupId>
+                <artifactId>test</artifactId>
+                <version>${rookit.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

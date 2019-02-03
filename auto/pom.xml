@@ -8,19 +8,22 @@
     <packaging>pom</packaging>
 
     <parent>
-        <groupId>com.github.JPDSousa</groupId>
-        <artifactId>rookit</artifactId>
+        <groupId>com.github.JPDSousa.rookit-storage</groupId>
+        <artifactId>rookit-storage</artifactId>
         <version>-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.github.JPDSousa.rookit-storage</groupId>
-    <artifactId>rookit-storage</artifactId>
+    <artifactId>auto</artifactId>
 
-    <name>Rookit Storage</name>
+    <name>Rookit Storage Auto</name>
 
     <modules>
+        <module>query</module>
+        <module>filter</module>
+        <module>update-filter</module>
+        <module>update</module>
         <module>api</module>
-        <module>auto</module>
+        <module>lib</module>
     </modules>
 
 </project>
