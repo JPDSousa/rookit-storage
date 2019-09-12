@@ -29,9 +29,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import org.rookit.auto.javapoet.naming.JavaPoetNamingFactory;
 import org.rookit.auto.javapoet.naming.JavaPoetParameterResolver;
-import org.rookit.auto.javax.element.ExtendedTypeElement;
-import org.rookit.storage.utils.ElementQuery;
-import org.rookit.storage.utils.PartialQuery;
+import org.rookit.auto.javax.type.ExtendedTypeElement;
+import org.rookit.storage.guice.ElementQuery;
+import org.rookit.storage.guice.PartialQuery;
 
 final class QueryJavaPoetPartialParameterResolver implements JavaPoetParameterResolver {
 

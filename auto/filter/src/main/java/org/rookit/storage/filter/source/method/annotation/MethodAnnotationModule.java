@@ -26,22 +26,33 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.rookit.auto.javapoet.method.AnnotationBasedMethodFactory;
-import org.rookit.auto.javapoet.method.MethodFactory;
+import com.squareup.javapoet.MethodSpec;
+import one.util.streamex.StreamEx;
+import org.rookit.auto.guice.Flat;
 import org.rookit.auto.javapoet.method.MethodSpecFactory;
-import org.rookit.auto.javapoet.method.annotation.BaseAnnotationBasedMethodFactory;
-import org.rookit.auto.javapoet.method.annotation.EntityMethodFactory;
-import org.rookit.auto.javapoet.method.annotation.PropertyMethodFactory;
-import org.rookit.auto.javax.property.PropertyAdapter;
-import org.rookit.auto.javax.property.PropertyExtractor;
+import org.rookit.auto.javax.type.ExtendedTypeElement;
+import org.rookit.auto.javax.visitor.ExtendedElementVisitor;
+import org.rookit.auto.javax.visitor.ExtendedElementVisitors;
+import org.rookit.auto.source.spec.SpecFactories;
+import org.rookit.auto.source.spec.SpecFactory;
+import org.rookit.auto.spec.AutoSpecFactories;
+import org.rookit.convention.auto.javapoet.ConventionAutoFactories;
+import org.rookit.convention.auto.javapoet.method.ConventionTypeElementMethodSpecVisitors;
+import org.rookit.convention.auto.javax.ConventionTypeElement;
+import org.rookit.convention.auto.javax.ConventionTypeElementFactory;
+import org.rookit.convention.auto.javax.type.adapter.ConventionTypeAdapters;
+import org.rookit.convention.auto.property.Property;
+import org.rookit.convention.auto.property.PropertyFactory;
+import org.rookit.convention.auto.property.filter.ConventionPropertyFilters;
 import org.rookit.storage.guice.FilterEntity;
 import org.rookit.storage.guice.FilterProperty;
 import org.rookit.storage.guice.TopFilter;
 import org.rookit.storage.guice.filter.Filter;
 import org.rookit.storage.guice.filter.PartialFilter;
+import org.rookit.utils.adapt.Adapter;
 
-import javax.annotation.processing.Messager;
-import javax.lang.model.util.Types;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 @SuppressWarnings("MethodMayBeStatic")
 public final class MethodAnnotationModule extends AbstractModule {
@@ -62,27 +73,47 @@ public final class MethodAnnotationModule extends AbstractModule {
     @Singleton
     @Provides
     @FilterEntity
-    AnnotationBasedMethodFactory entityMethodFactory(final Types types,
-                                                     @PartialFilter final MethodSpecFactory methodSpecFactory) {
-        return EntityMethodFactory.create(types, methodSpecFactory);
+    // TODO so much stuff in here. Please break it down
+    ExtendedElementVisitor<StreamEx<MethodSpec>, Void> entityMethodFactory(
+            final ConventionTypeElementMethodSpecVisitors visitors,
+            final ConventionAutoFactories javaPoetFactories,
+            final ConventionTypeAdapters conventionAdapters,
+            @PartialFilter final MethodSpecFactory methodSpecFactory,
+            final ConventionTypeElementFactory elementFactory,
+            final PropertyFactory propertyFactory) {
+        final Predicate<Property> propertyFilter = ConventionPropertyFilters.createEntityFilter(propertyFactory);
+        final BiFunction<ConventionTypeElement, Property, StreamEx<MethodSpec>> typeTransformation =
+                javaPoetFactories.createTypeTransformation(methodSpecFactory);
+
+        return visitors.<MethodSpec, Void>createPropertyLevelVisitor(typeTransformation)
+                .withConventionTypeAdapter(conventionAdapters
+                                                   .createPropertyFilterAdapter(propertyFilter, elementFactory))
+                .build();
     }
 
     @Singleton
     @Provides
     @FilterProperty
-    AnnotationBasedMethodFactory propertyMethodFactory(final PropertyExtractor propertyExtractor,
-                                                       @TopFilter final Provider<MethodFactory> methodFactory,
-                                                       final PropertyAdapter adapter) {
-        return PropertyMethodFactory.create(propertyExtractor, methodFactory, adapter);
+    SpecFactory<MethodSpec> propertyMethodFactory(
+            final AutoSpecFactories autoFactories,
+            @Flat final Adapter<ExtendedTypeElement> elementAdapter,
+            @TopFilter final Provider<SpecFactory<MethodSpec>> methodFactory) {
+        final SpecFactory<MethodSpec> lazyFactory = autoFactories.createLazyFactory(methodFactory);
+        return autoFactories.createAdapterFactory(lazyFactory, elementAdapter);
     }
 
     @Singleton
     @Provides
     @Filter
-    AnnotationBasedMethodFactory genericAnnotationMethodFactory(
-            @FilterEntity final AnnotationBasedMethodFactory entityFactory,
-            @FilterProperty final AnnotationBasedMethodFactory propertyFactory,
-            final Messager messager) {
-        return BaseAnnotationBasedMethodFactory.create(entityFactory, propertyFactory, messager);
+    SpecFactory<MethodSpec> genericAnnotationMethodFactory(
+            final SpecFactories specs,
+            final ExtendedElementVisitors visitors,
+            @FilterEntity final ExtendedElementVisitor<StreamEx<MethodSpec>, Void> entityFactory,
+            @FilterProperty final ExtendedElementVisitor<StreamEx<MethodSpec>, Void> propertyFactory) {
+        return specs.fromVisitor(
+                visitors.streamExBuilder(entityFactory)
+                        .withDirtyFallback(propertyFactory)
+                        .build()
+        );
     }
 }

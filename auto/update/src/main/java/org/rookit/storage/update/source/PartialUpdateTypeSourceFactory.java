@@ -27,13 +27,17 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
-import org.rookit.auto.javapoet.method.MethodFactory;
 import org.rookit.auto.javapoet.naming.JavaPoetParameterResolver;
-import org.rookit.auto.javapoet.type.AbstractInterfaceTypeSourceFactory;
-import org.rookit.auto.javapoet.type.TypeSourceAdapter;
-import org.rookit.auto.javax.element.ExtendedTypeElement;
-import org.rookit.auto.javax.property.PropertyExtractor;
+import org.rookit.auto.javapoet.type.JavaPoetTypeSourceFactory;
+import org.rookit.auto.javax.naming.Identifier;
+import org.rookit.auto.javax.type.ExtendedTypeElement;
+import org.rookit.auto.source.spec.SpecFactory;
+import org.rookit.auto.source.type.SingleTypeSourceFactory;
+import org.rookit.auto.source.type.TypeSource;
+import org.rookit.convention.auto.javax.ConventionTypeElement;
+import org.rookit.convention.auto.javax.ConventionTypeElementFactory;
 import org.rookit.storage.guice.PartialUpdate;
 import org.rookit.storage.guice.PartialUpdateFilter;
 import org.rookit.storage.guice.TopUpdate;
@@ -43,39 +47,48 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 // TODO semi copy-pasted from PropertyBasedTypeSourceFactory
-final class PartialUpdateTypeSourceFactory extends AbstractInterfaceTypeSourceFactory {
+final class PartialUpdateTypeSourceFactory implements SingleTypeSourceFactory {
 
-    private final PropertyExtractor extractor;
-    private final MethodFactory methodFactory;
+    private final SpecFactory<MethodSpec> specFactory;
     private final TypeName updateQueryTypeName;
+    private final JavaPoetParameterResolver parameterResolver;
+    private final JavaPoetTypeSourceFactory adapter;
+    private final ConventionTypeElementFactory elementFactory;
 
     @Inject
     private PartialUpdateTypeSourceFactory(@PartialUpdate final JavaPoetParameterResolver parameterResolver,
-                                           final TypeSourceAdapter adapter,
-                                           final PropertyExtractor extractor,
-                                           @TopUpdate final MethodFactory methodFactory,
-                                           @PartialUpdateFilter final TypeVariableName updateFilter) {
-        super(parameterResolver, adapter);
-        this.extractor = extractor;
-        this.methodFactory = methodFactory;
+                                           final JavaPoetTypeSourceFactory adapter,
+                                           @TopUpdate final SpecFactory<MethodSpec> specFactory,
+                                           @PartialUpdateFilter final TypeVariableName updateFilter,
+                                           final ConventionTypeElementFactory elementFactory) {
+        this.parameterResolver = parameterResolver;
+        this.adapter = adapter;
+        this.specFactory = specFactory;
         this.updateQueryTypeName = ParameterizedTypeName.get(
                 ClassName.get(UpdateQuery.class),
                 updateFilter
         );
+        this.elementFactory = elementFactory;
     }
 
     @Override
-    protected Collection<MethodSpec> methodsFor(final ExtendedTypeElement element) {
-        return this.extractor.fromType(element)
-                .filter(this.methodFactory::isCompatible)
-                .flatMap(property -> this.methodFactory.create(element, property))
+    public TypeSource create(final Identifier identifier, final ExtendedTypeElement element) {
+        final ConventionTypeElement conventionElement = this.elementFactory.extendType(element);
+        final TypeSpec spec = TypeSpec.interfaceBuilder(identifier.name())
+                .addSuperinterfaces(parentNamesOf(conventionElement))
+                .addMethods(methodsFor(conventionElement))
+                .build();
+
+        return this.adapter.fromTypeSpec(identifier, spec);
+    }
+
+    private Collection<MethodSpec> methodsFor(final ExtendedTypeElement element) {
+        return this.specFactory.create(element)
                 .collect(Collectors.toSet());
     }
 
-    @Override
-    protected Collection<TypeName> parentNamesOf(final ExtendedTypeElement baseElement) {
-        final ImmutableSet.Builder<TypeName> builder = ImmutableSet.<TypeName>builder()
-                .addAll(super.parentNamesOf(baseElement));
+    private Collection<TypeName> parentNamesOf(final ConventionTypeElement baseElement) {
+        final ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
 
         if (baseElement.isTopLevel()) {
             builder.add(this.updateQueryTypeName);
@@ -87,8 +100,7 @@ final class PartialUpdateTypeSourceFactory extends AbstractInterfaceTypeSourceFa
     @Override
     public String toString() {
         return "PartialUpdateTypeSourceFactory{" +
-                "extractor=" + this.extractor +
-                ", methodFactory=" + this.methodFactory +
+                ", methodFactory=" + this.specFactory +
                 ", updateQueryTypeName=" + this.updateQueryTypeName +
                 "} " + super.toString();
     }

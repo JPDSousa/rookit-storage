@@ -22,25 +22,30 @@
 package org.rookit.storage.filter.source.config;
 
 import com.squareup.javapoet.TypeVariableName;
-import org.rookit.auto.naming.PackageReference;
-import org.rookit.config.Configuration;
+import org.rookit.auto.javax.pack.ExtendedPackageElement;
+import org.rookit.utils.object.DynamicObject;
 import org.rookit.storage.api.config.FilterConfig;
+import org.rookit.utils.string.template.Template1;
+import org.rookit.utils.string.template.TemplateFactory;
 
 final class FilterConfigImpl implements FilterConfig {
 
-    private final Configuration configuration;
-    private final PackageReference basePackage;
-    private final String partialEntityPrefix;
+    private final DynamicObject configuration;
+    private final ExtendedPackageElement basePackage;
+    private final Template1 partialEntityTemplate;
     private final String name;
+    private final TemplateFactory templateFactory;
 
-    FilterConfigImpl(final Configuration configuration,
-                     final PackageReference basePackage,
-                     final String partialEntityPrefix,
-                     final String name) {
+    FilterConfigImpl(final DynamicObject configuration,
+                     final ExtendedPackageElement basePackage,
+                     final Template1 pEntityTemplate,
+                     final String name,
+                     final TemplateFactory templateFactory) {
         this.configuration = configuration;
         this.basePackage = basePackage;
-        this.partialEntityPrefix = partialEntityPrefix;
+        this.partialEntityTemplate = pEntityTemplate;
         this.name = name;
+        this.templateFactory = templateFactory;
     }
 
     @Override
@@ -49,23 +54,23 @@ final class FilterConfigImpl implements FilterConfig {
     }
 
     @Override
-    public PackageReference basePackage() {
+    public ExtendedPackageElement basePackage() {
         return this.basePackage.resolve(this.configuration.getString("basePackage"));
     }
 
     @Override
-    public String entitySuffix() {
-        return this.configuration.getString("entitySuffix");
+    public Template1 entityTemplate() {
+        return this.templateFactory.template1(this.configuration.getString("entityTemplate"));
     }
 
     @Override
-    public String partialEntityPrefix() {
-        return this.partialEntityPrefix;
+    public Template1 partialEntityTemplate() {
+        return this.partialEntityTemplate;
     }
 
     @Override
-    public String methodPrefix() {
-        return this.configuration.getString("methodPrefix");
+    public Template1 methodTemplate() {
+        return this.templateFactory.template1(this.configuration.getString("methodTemplate"));
     }
 
     @Override
@@ -83,7 +88,9 @@ final class FilterConfigImpl implements FilterConfig {
         return "FilterConfigImpl{" +
                 "configuration=" + this.configuration +
                 ", basePackage=" + this.basePackage +
-                ", partialEntityPrefix='" + this.partialEntityPrefix + '\'' +
+                ", partialEntityTemplate=" + this.partialEntityTemplate +
+                ", name='" + this.name + '\'' +
+                ", templateFactory=" + this.templateFactory +
                 "}";
     }
 }

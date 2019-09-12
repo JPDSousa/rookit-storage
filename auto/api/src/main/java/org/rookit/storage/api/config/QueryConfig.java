@@ -23,7 +23,8 @@ package org.rookit.storage.api.config;
 
 import com.squareup.javapoet.TypeVariableName;
 import org.rookit.auto.config.ProcessorConfig;
-import org.rookit.auto.naming.PackageReference;
+import org.rookit.auto.javax.pack.ExtendedPackageElement;
+import org.rookit.utils.string.template.Template1;
 
 public interface QueryConfig extends ProcessorConfig {
 
@@ -31,12 +32,12 @@ public interface QueryConfig extends ProcessorConfig {
 
     TypeVariableName elementParameterName();
 
-    PackageReference basePackage();
+    ExtendedPackageElement basePackage();
 
-    String entitySuffix();
+    Template1 entityTemplate();
 
-    String partialEntityPrefix();
+    Template1 partialEntityTemplate();
 
-    String methodPrefix();
+    Template1 methodTemplate();
 
 }

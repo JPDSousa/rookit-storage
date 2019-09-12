@@ -17,49 +17,40 @@
 
     <dependencies>
         <dependency>
-            <groupId>${rookit.group}.rookit-storage</groupId>
-            <artifactId>auto-api</artifactId>
+            <groupId>${rookit.group}.rookit-auto</groupId>
+            <artifactId>javax-lib</artifactId>
         </dependency>
         <dependency>
             <groupId>${rookit.group}.rookit-auto</groupId>
             <artifactId>lib</artifactId>
         </dependency>
         <dependency>
+            <groupId>${rookit.group}.rookit-auto</groupId>
+            <artifactId>source-javapoet-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${rookit.group}.rookit-convention</groupId>
+            <artifactId>auto-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${rookit.group}.rookit-convention</groupId>
+            <artifactId>auto-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${rookit.group}.rookit-storage</groupId>
+            <artifactId>auto-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${rookit.group}.rookit-storage</groupId>
             <artifactId>auto-lib</artifactId>
         </dependency>
+
+        <!-- Test dependencies -->
         <dependency>
             <groupId>${rookit.group}.rookit-auto</groupId>
             <artifactId>test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>${rookit.group}.rookit-storage</groupId>
-                <artifactId>auto-api</artifactId>
-                <version>${rookit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${rookit.group}.rookit-auto</groupId>
-                <artifactId>lib</artifactId>
-                <version>${rookit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${rookit.group}.rookit-storage</groupId>
-                <artifactId>auto-lib</artifactId>
-                <version>${rookit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${rookit.group}.rookit-auto</groupId>
-                <artifactId>test</artifactId>
-                <version>${rookit.version}</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
 
 </project>

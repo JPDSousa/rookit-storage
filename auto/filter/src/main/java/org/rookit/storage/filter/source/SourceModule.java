@@ -27,25 +27,26 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.util.Modules;
+import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeVariableName;
-import org.rookit.auto.entity.BaseEntityFactory;
-import org.rookit.auto.entity.BasePartialEntityFactory;
-import org.rookit.auto.entity.EntityFactory;
-import org.rookit.auto.entity.PartialEntityFactory;
-import org.rookit.auto.entity.parent.ParentExtractor;
-import org.rookit.auto.identifier.BaseEntityIdentifierFactory;
-import org.rookit.auto.identifier.EntityIdentifierFactory;
-import org.rookit.auto.javapoet.method.MethodFactory;
+import org.rookit.auto.javapoet.identifier.JavaPoetIdentifierFactories;
 import org.rookit.auto.javapoet.naming.JavaPoetNamingFactory;
 import org.rookit.auto.javapoet.naming.JavaPoetParameterResolver;
 import org.rookit.auto.javapoet.naming.LeafSingleParameterResolver;
 import org.rookit.auto.javapoet.naming.SelfSinglePartialParameterResolver;
 import org.rookit.auto.javapoet.type.EmptyInterfaceTypeSourceFactory;
-import org.rookit.auto.javapoet.type.PropertyBasedTypeSourceFactory;
-import org.rookit.auto.javapoet.type.TypeSourceAdapter;
-import org.rookit.auto.javax.property.PropertyExtractor;
-import org.rookit.auto.naming.NamingFactory;
-import org.rookit.auto.source.SingleTypeSourceFactory;
+import org.rookit.auto.javapoet.type.JavaPoetTypeSourceFactory;
+import org.rookit.auto.javax.naming.IdentifierFactory;
+import org.rookit.auto.javax.naming.NamingFactory;
+import org.rookit.auto.source.CodeSourceContainerFactory;
+import org.rookit.auto.source.CodeSourceFactory;
+import org.rookit.auto.source.spec.SpecFactory;
+import org.rookit.auto.source.type.SingleTypeSourceFactory;
+import org.rookit.convention.auto.entity.BaseEntityFactory;
+import org.rookit.convention.auto.entity.BasePartialEntityFactory;
+import org.rookit.convention.auto.entity.parent.ParentExtractor;
+import org.rookit.convention.auto.javapoet.type.ConventionSingleTypeSourceFactories;
+import org.rookit.convention.auto.javax.ConventionTypeElementFactory;
 import org.rookit.storage.api.config.FilterConfig;
 import org.rookit.storage.filter.source.config.ConfigurationModule;
 import org.rookit.storage.filter.source.method.FilterMethodModule;
@@ -55,7 +56,8 @@ import org.rookit.storage.guice.filter.Filter;
 import org.rookit.storage.guice.filter.FilterBase;
 import org.rookit.storage.guice.filter.PartialFilter;
 import org.rookit.utils.optional.OptionalFactory;
-import org.rookit.utils.primitive.VoidUtils;
+
+import java.util.concurrent.Executor;
 
 @SuppressWarnings("MethodMayBeStatic")
 public final class SourceModule extends AbstractModule {
@@ -75,11 +77,11 @@ public final class SourceModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(EntityFactory.class).to(Key.get(EntityFactory.class, FilterBase.class)).in(Singleton.class);
-        bind(PartialEntityFactory.class).to(Key.get(PartialEntityFactory.class, PartialFilter.class))
+        bind(CodeSourceFactory.class).to(Key.get(CodeSourceFactory.class, FilterBase.class)).in(Singleton.class);
+        bind(CodeSourceFactory.class).to(Key.get(CodeSourceFactory.class, PartialFilter.class))
                 .in(Singleton.class);
-        bind(PartialEntityFactory.class).annotatedWith(PartialFilter.class)
-                .to(Key.get(PartialEntityFactory.class, FilterBase.class)).in(Singleton.class);
+        bind(CodeSourceFactory.class).annotatedWith(PartialFilter.class)
+                .to(Key.get(CodeSourceFactory.class, FilterBase.class)).in(Singleton.class);
     }
 
     @Provides
@@ -92,34 +94,39 @@ public final class SourceModule extends AbstractModule {
     @Provides
     @Singleton
     @FilterBase
-    EntityFactory filterEntityFactory(@PartialFilter final PartialEntityFactory partialEntityFactory,
-                                      @Filter final EntityIdentifierFactory identifierFactory,
-                                      @Filter final SingleTypeSourceFactory typeSpecFactory) {
-        return BaseEntityFactory.create(partialEntityFactory, identifierFactory, typeSpecFactory);
+    CodeSourceFactory filterEntityFactory(@PartialFilter final CodeSourceFactory codeSourceFactory,
+                                          @Filter final IdentifierFactory identifierFactory,
+                                          @Filter final SingleTypeSourceFactory typeSpecFactory) {
+        return BaseEntityFactory.create(codeSourceFactory, identifierFactory, typeSpecFactory);
     }
 
     @Provides
     @Singleton
     @FilterBase
-    PartialEntityFactory filterPartialEntityFactory(@PartialFilter final EntityIdentifierFactory identifierFactory,
-                                                    @PartialFilter final SingleTypeSourceFactory typeSpecFactory,
-                                                    final OptionalFactory optionalFactory,
-                                                    final ParentExtractor extractor) {
-        return BasePartialEntityFactory.create(identifierFactory, typeSpecFactory, optionalFactory, extractor);
+    CodeSourceFactory filterPartialEntityFactory(@PartialFilter final IdentifierFactory identifierFactory,
+                                                 @PartialFilter final SingleTypeSourceFactory typeSpecFactory,
+                                                 final OptionalFactory optionalFactory,
+                                                 final ParentExtractor extractor,
+                                                 final CodeSourceContainerFactory containerFactory,
+                                                 final ConventionTypeElementFactory elementFactory) {
+        return BasePartialEntityFactory.create(identifierFactory, typeSpecFactory, optionalFactory,
+                extractor, containerFactory, elementFactory);
     }
 
     @Provides
     @PartialFilter
     @Singleton
-    EntityIdentifierFactory filterIdentifier(@PartialFilter final NamingFactory namingFactory) {
-        return BaseEntityIdentifierFactory.create(namingFactory);
+    IdentifierFactory filterIdentifier(final JavaPoetIdentifierFactories factories,
+                                       @PartialFilter final NamingFactory namingFactory) {
+        return factories.create(namingFactory);
     }
 
     @Provides
     @Filter
     @Singleton
-    EntityIdentifierFactory filterEntityIdentifier(@Filter final NamingFactory namingFactory) {
-        return BaseEntityIdentifierFactory.create(namingFactory);
+    IdentifierFactory filterEntityIdentifier(final JavaPoetIdentifierFactories factories,
+                                             @Filter final NamingFactory namingFactory) {
+        return factories.create(namingFactory);
     }
 
     @Singleton
@@ -141,11 +148,12 @@ public final class SourceModule extends AbstractModule {
     @Singleton
     @Provides
     @PartialFilter
-    SingleTypeSourceFactory filterTypeSourceFactory(@PartialFilter final JavaPoetParameterResolver parameterResolver,
-                                                    final PropertyExtractor extractor,
-                                                    @TopFilter final MethodFactory methodFactory,
-                                                    final TypeSourceAdapter adapter) {
-        return PropertyBasedTypeSourceFactory.create(parameterResolver, methodFactory, adapter, extractor);
+    SingleTypeSourceFactory filterTypeSourceFactory(final ConventionSingleTypeSourceFactories factories,
+                                                    @PartialFilter final JavaPoetParameterResolver parameterResolver,
+                                                    @TopFilter final SpecFactory<MethodSpec> specFactory,
+                                                    final JavaPoetTypeSourceFactory adapter,
+                                                    final ConventionTypeElementFactory elementFactory) {
+        return factories.propertyBasedTypeSourceFactory(parameterResolver, adapter, specFactory, elementFactory);
     }
 
     @Provides
@@ -153,8 +161,8 @@ public final class SourceModule extends AbstractModule {
     @Filter
     SingleTypeSourceFactory filterTypeSourceFactory(@Filter final JavaPoetParameterResolver parameterResolver,
                                                     @Filter final JavaPoetNamingFactory namingFactory,
-                                                    final VoidUtils voidUtils) {
-        return EmptyInterfaceTypeSourceFactory.create(parameterResolver, namingFactory, voidUtils);
+                                                    final Executor executor) {
+        return EmptyInterfaceTypeSourceFactory.create(parameterResolver, namingFactory, executor);
     }
 
 }

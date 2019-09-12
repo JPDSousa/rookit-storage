@@ -23,14 +23,14 @@ package org.rookit.storage.update.filter;
 
 import com.google.auto.service.AutoService;
 import com.google.inject.Module;
-import org.rookit.auto.AbstractEntityProcessor;
+import org.rookit.convention.auto.AbstractConventionProcessor;
 import org.rookit.storage.update.filter.source.SourceModule;
 
 import javax.annotation.processing.Processor;
 
 @SuppressWarnings("PublicConstructor")
 @AutoService(Processor.class)
-public final class UpdateFilterProcessor extends AbstractEntityProcessor {
+public final class UpdateFilterProcessor extends AbstractConventionProcessor {
 
     @Override
     protected Module sourceModule() {

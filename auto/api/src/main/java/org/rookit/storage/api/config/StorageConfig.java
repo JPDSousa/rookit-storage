@@ -22,15 +22,16 @@
 package org.rookit.storage.api.config;
 
 import org.rookit.auto.config.ProcessorConfig;
-import org.rookit.auto.naming.PackageReference;
-import org.rookit.config.Configuration;
+import org.rookit.auto.javax.pack.ExtendedPackageElement;
+import org.rookit.utils.object.DynamicObject;
+import org.rookit.utils.string.template.Template1;
 
 public interface StorageConfig extends ProcessorConfig {
 
-    PackageReference basePackage();
+    ExtendedPackageElement basePackage();
 
-    String partialEntityPrefix();
+    Template1 partialEntityTemplate();
 
-    Configuration getProcessorConfig(String name);
+    DynamicObject getProcessorConfig(String name);
 
 }

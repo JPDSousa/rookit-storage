@@ -25,8 +25,8 @@ package org.rookit.storage.filter;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.rookit.auto.EntityProcessor;
-import org.rookit.auto.EntityProcessorTest;
+import org.rookit.auto.ExtendedProcessor;
+import org.rookit.auto.ExtendedProcessorTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -37,18 +37,18 @@ import java.nio.file.Paths;
 
 @SuppressWarnings("JUnitTestCaseWithNoTests")
 @ExtendWith(TemporaryFolderExtension.class)
-public class FilterProcessorTest implements EntityProcessorTest {
+public class FilterProcessorTest implements ExtendedProcessorTest {
 
     private String configContent;
 
     @BeforeEach
     public void readConfig() throws URISyntaxException, IOException {
-        final Path path = Paths.get(FilterProcessorTest.class.getResource("/config.json").toURI());
+        final Path path = Paths.get(getClass().getResource("/config.json").toURI());
         this.configContent = new String(Files.readAllBytes(path), Charset.defaultCharset());
     }
 
     @Override
-    public EntityProcessor processor() {
+    public ExtendedProcessor processor() {
         return new FilterProcessor();
     }
 

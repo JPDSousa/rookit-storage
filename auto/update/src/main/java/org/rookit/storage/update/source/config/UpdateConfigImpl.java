@@ -22,19 +22,30 @@
 package org.rookit.storage.update.source.config;
 
 import com.squareup.javapoet.TypeVariableName;
-import org.rookit.auto.naming.PackageReference;
-import org.rookit.auto.naming.PackageReferenceFactory;
-import org.rookit.config.Configuration;
+import org.rookit.auto.javax.pack.ExtendedPackageElement;
+import org.rookit.utils.object.DynamicObject;
 import org.rookit.storage.api.config.UpdateConfig;
+import org.rookit.utils.string.template.Template1;
+import org.rookit.utils.string.template.TemplateFactory;
 
 final class UpdateConfigImpl implements UpdateConfig {
 
-    private final Configuration configuration;
-    private final PackageReferenceFactory packageFactory;
+    private final DynamicObject configuration;
+    private final String name;
+    private final Template1 partialEntityTemplate;
+    private final ExtendedPackageElement basePackage;
+    private final TemplateFactory templateFactory;
 
-    UpdateConfigImpl(final Configuration configuration, final PackageReferenceFactory packageFactory) {
+    UpdateConfigImpl(final DynamicObject configuration,
+                     final String name,
+                     final Template1 pEntityTemplate,
+                     final ExtendedPackageElement basePackage,
+                     final TemplateFactory templateFactory) {
         this.configuration = configuration;
-        this.packageFactory = packageFactory;
+        this.name = name;
+        this.partialEntityTemplate = pEntityTemplate;
+        this.basePackage = basePackage;
+        this.templateFactory = templateFactory;
     }
 
     @Override
@@ -43,23 +54,28 @@ final class UpdateConfigImpl implements UpdateConfig {
     }
 
     @Override
-    public PackageReference basePackage() {
-        return this.packageFactory.create(this.configuration.getString("basePackage"));
+    public ExtendedPackageElement basePackage() {
+        return this.basePackage.resolve(this.configuration.getString("basePackage"));
     }
 
     @Override
-    public String entitySuffix() {
-        return this.configuration.getString("entitySuffix");
+    public Template1 entityTemplate() {
+        return this.templateFactory.template1(this.configuration.getString("entityTemplate"));
     }
 
     @Override
-    public String partialEntityPrefix() {
-        return this.configuration.getString("partialEntityPrefix");
+    public Template1 partialEntityTemplate() {
+        return this.partialEntityTemplate;
     }
 
     @Override
-    public String methodPrefix() {
-        return this.configuration.getString("methodPrefix");
+    public Template1 methodTemplate() {
+        return this.templateFactory.template1(this.configuration.getString("methodTemplate"));
+    }
+
+    @Override
+    public String name() {
+        return this.name;
     }
 
     @Override
@@ -71,7 +87,10 @@ final class UpdateConfigImpl implements UpdateConfig {
     public String toString() {
         return "UpdateConfigImpl{" +
                 "configuration=" + this.configuration +
-                ", packageFactory=" + this.packageFactory +
+                ", name='" + this.name + '\'' +
+                ", partialEntityTemplate=" + this.partialEntityTemplate +
+                ", basePackage=" + this.basePackage +
+                ", templateFactory=" + this.templateFactory +
                 "}";
     }
 }

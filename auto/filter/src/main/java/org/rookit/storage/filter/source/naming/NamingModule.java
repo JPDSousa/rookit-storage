@@ -21,21 +21,19 @@
  ******************************************************************************/
 package org.rookit.storage.filter.source.naming;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.rookit.auto.javapoet.naming.JavaPoetNamingFactory;
-import org.rookit.auto.naming.AbstractNamingModule;
-import org.rookit.auto.naming.BaseJavaPoetNamingFactory;
-import org.rookit.auto.naming.PackageReference;
+import org.rookit.auto.javax.pack.ExtendedPackageElement;
 import org.rookit.storage.api.config.FilterConfig;
 import org.rookit.storage.guice.filter.Filter;
 import org.rookit.storage.guice.filter.PartialFilter;
 
-import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.rookit.auto.guice.RookitAutoModuleTools.bindNaming;
 
 @SuppressWarnings("MethodMayBeStatic")
-public final class NamingModule extends AbstractNamingModule {
+public final class NamingModule extends AbstractModule {
 
     private static final Module MODULE = new NamingModule();
 
@@ -47,35 +45,15 @@ public final class NamingModule extends AbstractNamingModule {
 
     @Override
     protected void configure() {
-        bindNaming(PartialFilter.class);
-        bindNaming(Filter.class);
+        bindNaming(binder(), PartialFilter.class).toProvider(PartialFilterNamingFactoryProvider.class)
+                .in(Singleton.class);
+        bindNaming(binder(), Filter.class).toProvider(FilterJavaPoetNamingFactoryProvider.class).in(Singleton.class);
     }
 
     @Singleton
     @Provides
-    PackageReference basePackage(final FilterConfig filterConfig) {
+    ExtendedPackageElement basePackage(final FilterConfig filterConfig) {
         return filterConfig.basePackage();
     }
 
-    @Singleton
-    @Provides
-    @Filter
-    static JavaPoetNamingFactory filterEntityNamingFactory(final PackageReference packageReference,
-                                                           final FilterConfig config) {
-        // TODO in the future this mapping logic between FilterConfig and BaseJavaPoetNamingFactory might be moved into
-        // TODO a dedicated implementation of JavaPoetNamingFactory
-        return BaseJavaPoetNamingFactory.create(packageReference, config.entitySuffix(), EMPTY, config.methodPrefix());
-    }
-
-    @Singleton
-    @Provides
-    @PartialFilter
-    JavaPoetNamingFactory filterNamingFactory(final PackageReference packageReference,
-                                              final FilterConfig config) {
-        // TODO in the future this mapping logic between FilterConfig and BaseJavaPoetNamingFactory might be moved into
-        // TODO a dedicated implementation of JavaPoetNamingFactory
-        return BaseJavaPoetNamingFactory.create(packageReference, config.entitySuffix(),
-                config.partialEntityPrefix(),
-                config.methodPrefix());
-    }
 }

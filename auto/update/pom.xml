@@ -20,6 +20,10 @@
             <groupId>${rookit.group}.rookit-storage</groupId>
             <artifactId>auto-update-filter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${rookit.group}.rookit-storage</groupId>
+            <artifactId>auto-lib</artifactId>
+        </dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>${rookit.group}.rookit-auto</groupId>
@@ -27,21 +31,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>${rookit.group}.rookit-storage</groupId>
-                <artifactId>auto-update-filter</artifactId>
-                <version>${rookit.version}</version>
-            </dependency>
-            <!-- Test dependencies -->
-            <dependency>
-                <groupId>${rookit.group}.rookit-auto</groupId>
-                <artifactId>test</artifactId>
-                <version>${rookit.version}</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
 </project>

@@ -26,8 +26,9 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.rookit.auto.config.AutoConfig;
-import org.rookit.auto.naming.PackageReferenceFactory;
+import org.rookit.auto.javax.pack.ExtendedPackageElementFactory;
 import org.rookit.storage.api.config.StorageConfig;
+import org.rookit.utils.string.template.TemplateFactory;
 
 public final class StorageModule extends AbstractModule {
 
@@ -46,8 +47,10 @@ public final class StorageModule extends AbstractModule {
 
     @Provides
     @Singleton
-    static StorageConfig storageConfig(final AutoConfig config, final PackageReferenceFactory referenceFactory) {
+    static StorageConfig storageConfig(final AutoConfig config,
+                                       final ExtendedPackageElementFactory referenceFactory,
+                                       final TemplateFactory templateFactory) {
         final String name = "storage";
-        return new StorageConfigImpl(config.getProcessorConfig(name), referenceFactory, name);
+        return new StorageConfigImpl(config.getProcessorConfig(name), referenceFactory, name, templateFactory);
     }
 }

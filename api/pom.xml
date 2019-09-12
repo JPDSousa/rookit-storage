@@ -20,15 +20,5 @@
         </dependency>
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>one.util</groupId>
-                <artifactId>streamex</artifactId>
-                <version>${streamex.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
 
 </project>

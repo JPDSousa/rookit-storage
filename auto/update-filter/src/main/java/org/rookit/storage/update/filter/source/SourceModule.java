@@ -21,48 +21,52 @@
  ******************************************************************************/
 package org.rookit.storage.update.filter.source;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.util.Modules;
 import com.squareup.javapoet.TypeVariableName;
-import org.rookit.auto.entity.BaseEntityFactory;
-import org.rookit.auto.entity.BasePartialEntityFactory;
-import org.rookit.auto.entity.EntityFactory;
-import org.rookit.auto.entity.PartialEntityFactory;
-import org.rookit.auto.entity.lazy.LazyPartialEntityFactory;
-import org.rookit.auto.entity.nowrite.NoWriteEntityFactory;
-import org.rookit.auto.entity.nowrite.NoWritePartialEntityFactory;
-import org.rookit.auto.entity.parent.MultiFactoryParentExtractor;
-import org.rookit.auto.entity.parent.ParentExtractor;
-import org.rookit.auto.identifier.BaseEntityIdentifierFactory;
-import org.rookit.auto.identifier.EntityIdentifierFactory;
+import org.rookit.auto.javapoet.identifier.JavaPoetIdentifierFactories;
+import org.rookit.auto.javapoet.naming.JavaPoetNamingFactories;
 import org.rookit.auto.javapoet.naming.JavaPoetNamingFactory;
 import org.rookit.auto.javapoet.naming.JavaPoetParameterResolver;
 import org.rookit.auto.javapoet.naming.LeafSingleParameterResolver;
 import org.rookit.auto.javapoet.naming.SelfSinglePartialParameterResolver;
 import org.rookit.auto.javapoet.type.EmptyLeafTypeSourceFactory;
-import org.rookit.auto.javapoet.type.TypeSourceAdapter;
-import org.rookit.auto.naming.AbstractNamingModule;
-import org.rookit.auto.naming.BaseJavaPoetNamingFactory;
-import org.rookit.auto.naming.NamingFactory;
-import org.rookit.auto.naming.PackageReference;
-import org.rookit.auto.source.SingleTypeSourceFactory;
+import org.rookit.auto.javapoet.type.JavaPoetTypeSourceFactory;
+import org.rookit.auto.javax.naming.IdentifierFactory;
+import org.rookit.auto.javax.naming.NamingFactory;
+import org.rookit.auto.javax.pack.ExtendedPackageElement;
+import org.rookit.auto.source.CodeSourceContainerFactory;
+import org.rookit.auto.source.CodeSourceFactory;
+import org.rookit.auto.source.type.SingleTypeSourceFactory;
+import org.rookit.convention.auto.entity.BaseEntityFactory;
+import org.rookit.convention.auto.entity.BasePartialEntityFactory;
+import org.rookit.convention.auto.entity.lazy.LazyPartialEntityFactory;
+import org.rookit.convention.auto.entity.nowrite.NoWriteEntityFactory;
+import org.rookit.convention.auto.entity.nowrite.NoWritePartialEntityFactory;
+import org.rookit.convention.auto.entity.parent.MultiFactoryParentExtractor;
+import org.rookit.convention.auto.entity.parent.ParentExtractor;
+import org.rookit.convention.auto.javax.ConventionTypeElementFactory;
+import org.rookit.convention.auto.property.PropertyFactory;
+import org.rookit.storage.api.config.UpdateFilterConfig;
 import org.rookit.storage.guice.PartialUpdateFilter;
 import org.rookit.storage.guice.UpdateFilter;
 import org.rookit.storage.guice.filter.Filter;
 import org.rookit.storage.guice.filter.FilterBase;
 import org.rookit.storage.guice.filter.PartialFilter;
 import org.rookit.storage.update.filter.source.config.ConfigurationModule;
-import org.rookit.storage.api.config.UpdateFilterConfig;
+import org.rookit.utils.guice.Self;
 import org.rookit.utils.optional.OptionalFactory;
 import org.rookit.utils.primitive.VoidUtils;
+import org.rookit.utils.string.template.Template1;
 
-import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.rookit.auto.guice.RookitAutoModuleTools.bindNaming;
 
 @SuppressWarnings("MethodMayBeStatic")
-public final class SourceModule extends AbstractNamingModule {
+public final class SourceModule extends AbstractModule {
 
     private static final Module MODULE = Modules.combine(
             new SourceModule(),
@@ -77,8 +81,8 @@ public final class SourceModule extends AbstractNamingModule {
 
     @Override
     protected void configure() {
-        bindNaming(UpdateFilter.class);
-        bindNaming(PartialUpdateFilter.class);
+        bindNaming(binder(), UpdateFilter.class);
+        bindNaming(binder(), PartialUpdateFilter.class);
         bind(SingleTypeSourceFactory.class).annotatedWith(PartialUpdateFilter.class)
                 .to(UpdateFilterPartialTypeSourceFactory.class).in(Singleton.class);
     }
@@ -86,41 +90,49 @@ public final class SourceModule extends AbstractNamingModule {
     @Provides
     @Singleton
     @PartialFilter
-    ParentExtractor parentExtractor(@PartialFilter final PartialEntityFactory filterFactory,
-                                    final Provider<PartialEntityFactory> partialEntityFactory) {
-        return MultiFactoryParentExtractor.create(LazyPartialEntityFactory.create(partialEntityFactory), filterFactory);
+    ParentExtractor parentExtractor(@PartialFilter final CodeSourceFactory filterFactory,
+                                    final Provider<CodeSourceFactory> partialEntityFactory,
+                                    final PropertyFactory propertyFactory) {
+        return MultiFactoryParentExtractor.create(LazyPartialEntityFactory.create(partialEntityFactory),
+                filterFactory, propertyFactory);
     }
 
     @Provides
     @Singleton
-    PartialEntityFactory partialEntityFactory(@PartialUpdateFilter final EntityIdentifierFactory identifierFactory,
-                                              @PartialUpdateFilter final SingleTypeSourceFactory typeSourceFactory,
-                                              @PartialFilter final ParentExtractor extractor,
-                                              final OptionalFactory optionalFactory) {
-        return BasePartialEntityFactory.create(identifierFactory, typeSourceFactory, optionalFactory, extractor);
+    CodeSourceFactory partialEntityFactory(@PartialUpdateFilter final IdentifierFactory identifierFactory,
+                                           @PartialUpdateFilter final SingleTypeSourceFactory typeSourceFactory,
+                                           @PartialFilter final ParentExtractor extractor,
+                                           final OptionalFactory optionalFactory,
+                                           final CodeSourceContainerFactory containerFactory,
+                                           final ConventionTypeElementFactory elementFactory) {
+        return BasePartialEntityFactory.create(identifierFactory, typeSourceFactory, optionalFactory,
+                extractor, containerFactory, elementFactory);
     }
 
     @Singleton
     @Provides
     @PartialUpdateFilter
-    JavaPoetNamingFactory partialUpdateFilterNamingFactory(@UpdateFilter final PackageReference packageReference,
-                                                           final UpdateFilterConfig config) {
-        return BaseJavaPoetNamingFactory.create(packageReference, config.entitySuffix(), config.partialEntityPrefix(),
-                EMPTY);
+    JavaPoetNamingFactory partialUpdateFilterNamingFactory(final JavaPoetNamingFactories factories,
+                                                           @UpdateFilter final ExtendedPackageElement packageElement,
+                                                           final UpdateFilterConfig config,
+                                                           @Self final Template1 noopTemplate) {
+        return factories.create(packageElement, config.entityTemplate(), noopTemplate);
     }
 
     @Singleton
     @Provides
     @UpdateFilter
-    JavaPoetNamingFactory updateFilterNamingFactory(@UpdateFilter final PackageReference packageReference,
-                                                    final UpdateFilterConfig config) {
-        return BaseJavaPoetNamingFactory.create(packageReference, config.entitySuffix(), EMPTY, EMPTY);
+    JavaPoetNamingFactory updateFilterNamingFactory(final JavaPoetNamingFactories factories,
+                                                    @UpdateFilter final ExtendedPackageElement packageElement,
+                                                    final UpdateFilterConfig config,
+                                                    @Self final Template1 noopTemplate) {
+        return factories.create(packageElement, config.entityTemplate(), noopTemplate);
     }
 
     @Singleton
     @Provides
     @UpdateFilter
-    PackageReference updateFilterPackage(final UpdateFilterConfig config) {
+    ExtendedPackageElement updateFilterPackage(final UpdateFilterConfig config) {
         return config.basePackage();
     }
 
@@ -133,25 +145,27 @@ public final class SourceModule extends AbstractNamingModule {
 
     @Provides
     @Singleton
-    EntityFactory updateFilterEntityFactory(final PartialEntityFactory partialEntityFactory,
-                                            @UpdateFilter final EntityIdentifierFactory identifierFactory,
-                                            @UpdateFilter final SingleTypeSourceFactory typeSpecFactory) {
-        return BaseEntityFactory.create(partialEntityFactory, identifierFactory, typeSpecFactory);
+    CodeSourceFactory updateFilterEntityFactory(final CodeSourceFactory codeSourceFactory,
+                                                @UpdateFilter final IdentifierFactory identifierFactory,
+                                                @UpdateFilter final SingleTypeSourceFactory typeSpecFactory) {
+        return BaseEntityFactory.create(codeSourceFactory, identifierFactory, typeSpecFactory);
     }
 
     @Singleton
     @Provides
     @UpdateFilter
-    EntityIdentifierFactory updateFilterIdentifierFactory(@UpdateFilter final NamingFactory namingFactory) {
-        return BaseEntityIdentifierFactory.create(namingFactory);
+    IdentifierFactory updateFilterIdentifierFactory(final JavaPoetIdentifierFactories factories,
+                                                    @UpdateFilter final NamingFactory namingFactory) {
+        return factories.create(namingFactory);
     }
 
     @Singleton
     @Provides
     @PartialUpdateFilter
-    EntityIdentifierFactory partialUpdateFilterIdentifierFactory(
+    IdentifierFactory partialUpdateFilterIdentifierFactory(
+            final JavaPoetIdentifierFactories factories,
             @PartialUpdateFilter final NamingFactory namingFactory) {
-        return BaseEntityIdentifierFactory.create(namingFactory);
+        return factories.create(namingFactory);
     }
 
     @Singleton
@@ -174,7 +188,7 @@ public final class SourceModule extends AbstractNamingModule {
     @Singleton
     @Provides
     @UpdateFilter
-    SingleTypeSourceFactory updateFilterTypeSourceFactory(final TypeSourceAdapter adapter,
+    SingleTypeSourceFactory updateFilterTypeSourceFactory(final JavaPoetTypeSourceFactory adapter,
                                                           @UpdateFilter final JavaPoetParameterResolver resolver) {
         return EmptyLeafTypeSourceFactory.create(adapter, resolver);
     }
@@ -182,16 +196,16 @@ public final class SourceModule extends AbstractNamingModule {
     @Provides
     @Singleton
     @Filter
-    EntityFactory filterEntityFactory(@FilterBase final EntityFactory entityFactory,
-                                      final VoidUtils voidUtils) {
-        return NoWriteEntityFactory.create(entityFactory, voidUtils);
+    CodeSourceFactory filterEntityFactory(@FilterBase final CodeSourceFactory codeSourceFactory,
+                                          final VoidUtils voidUtils) {
+        return NoWriteEntityFactory.create(codeSourceFactory, voidUtils);
     }
 
     @Provides
     @Singleton
     @PartialFilter
-    PartialEntityFactory filterPartialEntityFactory(@FilterBase final PartialEntityFactory entityFactory,
-                                                    final VoidUtils voidUtils) {
+    CodeSourceFactory filterPartialEntityFactory(@FilterBase final CodeSourceFactory entityFactory,
+                                                 final VoidUtils voidUtils) {
         return NoWritePartialEntityFactory.create(entityFactory, voidUtils);
     }
 }

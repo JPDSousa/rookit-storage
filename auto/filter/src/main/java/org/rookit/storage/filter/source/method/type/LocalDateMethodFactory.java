@@ -22,33 +22,46 @@
 package org.rookit.storage.filter.source.method.type;
 
 import com.google.inject.Inject;
-import org.rookit.auto.javapoet.method.MethodSpecFactory;
-import org.rookit.auto.javax.ExtendedTypeMirror;
-import org.rookit.auto.javax.ExtendedTypeMirrorFactory;
-import org.rookit.storage.guice.filter.PartialFilter;
+import com.google.inject.Provider;
+import com.squareup.javapoet.MethodSpec;
+import one.util.streamex.StreamEx;
+import org.rookit.auto.javax.type.ExtendedTypeMirror;
+import org.rookit.auto.javax.type.ExtendedTypeMirrorFactory;
+import org.rookit.convention.auto.javapoet.method.ConventionTypeElementMethodSpecVisitors;
+import org.rookit.convention.auto.javax.visitor.ConventionTypeElementVisitor;
+import org.rookit.convention.auto.javax.visitor.TypeBasedMethodVisitor;
+import org.rookit.storage.filter.source.guice.Time;
 
 import java.time.LocalDate;
 
-final class LocalDateMethodFactory extends AbstractTimeMethodFactory {
+final class LocalDateMethodFactory implements Provider<TypeBasedMethodVisitor<Void>> {
 
     private final ExtendedTypeMirror type;
+    private final ConventionTypeElementVisitor<StreamEx<MethodSpec>, Void> delegate;
+    private final ConventionTypeElementMethodSpecVisitors specs;
 
     @Inject
     private LocalDateMethodFactory(final ExtendedTypeMirrorFactory factory,
-                                   @PartialFilter final MethodSpecFactory methodSpecFactory) {
-        super(methodSpecFactory);
+                                   @Time final ConventionTypeElementVisitor<StreamEx<MethodSpec>, Void> delegate,
+                                   final ConventionTypeElementMethodSpecVisitors specs) {
         this.type = factory.createWithErasure(LocalDate.class);
+        this.delegate = delegate;
+        this.specs = specs;
     }
 
     @Override
-    public ExtendedTypeMirror type() {
-        return this.type;
+    public TypeBasedMethodVisitor<Void> get() {
+        return this.specs.streamExMethodBuilder(this.delegate)
+                .withType(this.type)
+                .build();
     }
 
     @Override
     public String toString() {
         return "LocalDateMethodFactory{" +
                 "type=" + this.type +
-                "} " + super.toString();
+                ", delegate=" + this.delegate +
+                ", specs=" + this.specs +
+                "}";
     }
 }

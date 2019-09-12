@@ -21,38 +21,43 @@
  ******************************************************************************/
 package org.rookit.storage.config;
 
-import org.rookit.auto.naming.PackageReference;
-import org.rookit.auto.naming.PackageReferenceFactory;
-import org.rookit.config.Configuration;
+import org.rookit.auto.javax.pack.ExtendedPackageElement;
+import org.rookit.auto.javax.pack.ExtendedPackageElementFactory;
+import org.rookit.utils.object.DynamicObject;
 import org.rookit.storage.api.config.StorageConfig;
+import org.rookit.utils.string.template.Template1;
+import org.rookit.utils.string.template.TemplateFactory;
 
 final class StorageConfigImpl implements StorageConfig {
 
-    private final Configuration configuration;
-    private final PackageReferenceFactory referenceFactory;
+    private final DynamicObject configuration;
+    private final ExtendedPackageElementFactory referenceFactory;
     private final String name;
+    private final TemplateFactory templateFactory;
 
-    StorageConfigImpl(final Configuration configuration,
-                      final PackageReferenceFactory referenceFactory,
-                      final String name) {
+    StorageConfigImpl(final DynamicObject configuration,
+                      final ExtendedPackageElementFactory referenceFactory,
+                      final String name,
+                      final TemplateFactory templateFactory) {
         this.configuration = configuration;
         this.referenceFactory = referenceFactory;
         this.name = name;
+        this.templateFactory = templateFactory;
     }
 
     @Override
-    public PackageReference basePackage() {
+    public ExtendedPackageElement basePackage() {
         return this.referenceFactory.create(this.configuration.getString("basePackage"));
     }
 
     @Override
-    public String partialEntityPrefix() {
-        return this.configuration.getString("partialEntityPrefix");
+    public Template1 partialEntityTemplate() {
+        return this.templateFactory.template1(this.configuration.getString("partialEntityTemplate"));
     }
 
     @Override
-    public Configuration getProcessorConfig(final String name) {
-        return this.configuration.getConfig(name);
+    public DynamicObject getProcessorConfig(final String name) {
+        return this.configuration.getDynamicObject(name);
     }
 
     @Override
@@ -71,6 +76,7 @@ final class StorageConfigImpl implements StorageConfig {
                 "configuration=" + this.configuration +
                 ", referenceFactory=" + this.referenceFactory +
                 ", name='" + this.name + '\'' +
+                ", templateFactory=" + this.templateFactory +
                 "}";
     }
 }

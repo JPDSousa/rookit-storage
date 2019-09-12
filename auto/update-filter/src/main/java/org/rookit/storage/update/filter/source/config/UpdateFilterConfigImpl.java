@@ -22,21 +22,30 @@
 package org.rookit.storage.update.filter.source.config;
 
 import com.squareup.javapoet.TypeVariableName;
-import org.rookit.auto.naming.PackageReference;
-import org.rookit.auto.naming.PackageReferenceFactory;
-import org.rookit.config.Configuration;
+import org.rookit.auto.javax.pack.ExtendedPackageElement;
+import org.rookit.utils.object.DynamicObject;
 import org.rookit.storage.api.config.UpdateFilterConfig;
+import org.rookit.utils.string.template.Template1;
+import org.rookit.utils.string.template.TemplateFactory;
 
 final class UpdateFilterConfigImpl implements UpdateFilterConfig {
 
-    private final Configuration configuration;
-    private final PackageReferenceFactory packageFactory;
+    private final DynamicObject configuration;
+    private final ExtendedPackageElement basePackage;
+    private final Template1 partialEntityTemplate;
     private final String name;
+    private final TemplateFactory templateFactory;
 
-    UpdateFilterConfigImpl(final Configuration configuration, final PackageReferenceFactory packageFactory, final String name) {
+    UpdateFilterConfigImpl(final DynamicObject configuration,
+                           final ExtendedPackageElement basePackage,
+                           final Template1 pEntityTemplate,
+                           final String name,
+                           final TemplateFactory templateFactory) {
         this.configuration = configuration;
-        this.packageFactory = packageFactory;
+        this.basePackage = basePackage;
+        this.partialEntityTemplate = pEntityTemplate;
         this.name = name;
+        this.templateFactory = templateFactory;
     }
 
     @Override
@@ -45,18 +54,18 @@ final class UpdateFilterConfigImpl implements UpdateFilterConfig {
     }
 
     @Override
-    public PackageReference basePackage() {
-        return this.packageFactory.create(this.configuration.getString("basePackage"));
+    public ExtendedPackageElement basePackage() {
+        return this.basePackage.resolve(this.configuration.getString("basePackage"));
     }
 
     @Override
-    public String entitySuffix() {
-        return this.configuration.getString("entitySuffix");
+    public Template1 entityTemplate() {
+        return this.templateFactory.template1(this.configuration.getString("entityTemplate"));
     }
 
     @Override
-    public String partialEntityPrefix() {
-        return this.configuration.getString("partialEntityPrefix");
+    public Template1 partialEntityTemplate() {
+        return this.partialEntityTemplate;
     }
 
     @Override
@@ -73,7 +82,10 @@ final class UpdateFilterConfigImpl implements UpdateFilterConfig {
     public String toString() {
         return "UpdateFilterConfigImpl{" +
                 "configuration=" + this.configuration +
-                ", packageFactory=" + this.packageFactory +
+                ", basePackage=" + this.basePackage +
+                ", partialEntityTemplate=" + this.partialEntityTemplate +
+                ", name='" + this.name + '\'' +
+                ", templateFactory=" + this.templateFactory +
                 "}";
     }
 }

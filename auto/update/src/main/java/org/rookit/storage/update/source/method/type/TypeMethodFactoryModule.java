@@ -23,14 +23,17 @@ package org.rookit.storage.update.source.method.type;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.Multibinder;
-import org.rookit.auto.javapoet.method.TypeBasedMethodFactory;
-import org.rookit.storage.utils.Update;
+import com.google.inject.util.Modules;
+import org.rookit.storage.update.source.method.type.collection.CollectionMethodModule;
+import org.rookit.storage.update.source.method.type.optional.OptionalMethodModule;
 
 public final class TypeMethodFactoryModule extends AbstractModule {
 
-    private static final Module MODULE = new TypeMethodFactoryModule();
+    private static final Module MODULE = Modules.combine(
+            new TypeMethodFactoryModule(),
+            OptionalMethodModule.getModule(),
+            CollectionMethodModule.getModule()
+    );
 
     public static Module getModule() {
         return MODULE;
@@ -38,15 +41,4 @@ public final class TypeMethodFactoryModule extends AbstractModule {
 
     private TypeMethodFactoryModule() {}
 
-    @Override
-    protected void configure() {
-        final Multibinder<TypeBasedMethodFactory> multibinder = Multibinder.newSetBinder(binder(),
-                TypeBasedMethodFactory.class, Update.class);
-        multibinder.addBinding().to(OptionalMethodFactory.class).in(Singleton.class);
-        multibinder.addBinding().to(CollectionMethodFactory.class).in(Singleton.class);
-        multibinder.addBinding().toProvider(OptionalBooleanMethodFactoryProvider.class).in(Singleton.class);
-        multibinder.addBinding().toProvider(OptionalDoubleMethodFactoryProvider.class).in(Singleton.class);
-        multibinder.addBinding().toProvider(OptionalIntMethodFactoryProvider.class).in(Singleton.class);
-        multibinder.addBinding().toProvider(OptionalShortMethodFactoryProvider.class).in(Singleton.class);
-    }
 }

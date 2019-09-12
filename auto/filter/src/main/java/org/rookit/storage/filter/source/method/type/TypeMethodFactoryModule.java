@@ -22,14 +22,25 @@
 package org.rookit.storage.filter.source.method.type;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.util.Modules;
-import org.rookit.auto.javapoet.method.TypeBasedMethodFactory;
+import org.rookit.convention.auto.javax.visitor.TypeBasedMethodVisitor;
+import org.rookit.storage.filter.source.guice.After;
+import org.rookit.storage.filter.source.guice.Before;
+import org.rookit.storage.filter.source.guice.Between;
+import org.rookit.storage.filter.source.guice.Time;
 import org.rookit.storage.filter.source.method.type.collection.CollectionModule;
 import org.rookit.storage.filter.source.method.type.optional.OptionalModule;
 import org.rookit.storage.guice.filter.Filter;
+import org.rookit.utils.guice.Self;
+import org.rookit.utils.string.template.Template1;
+import org.rookit.utils.string.template.TemplateFactory;
 
+@SuppressWarnings("MethodMayBeStatic")
 public final class TypeMethodFactoryModule extends AbstractModule {
 
     private static final Module MODULE = Modules.combine(new TypeMethodFactoryModule(),
@@ -42,12 +53,42 @@ public final class TypeMethodFactoryModule extends AbstractModule {
 
     private TypeMethodFactoryModule() {}
 
+    @SuppressWarnings({"AnonymousInnerClassMayBeStatic", "AnonymousInnerClass", "EmptyClass"})
     @Override
     protected void configure() {
-        final Multibinder<TypeBasedMethodFactory> multibinder = Multibinder.newSetBinder(binder(),
-                TypeBasedMethodFactory.class, Filter.class);
-        multibinder.addBinding().to(LocalDateMethodFactory.class);
-        multibinder.addBinding().to(DurationMethodFactory.class);
+        final Multibinder<TypeBasedMethodVisitor> multibinder = Multibinder.newSetBinder(binder(),
+                TypeBasedMethodVisitor.class, Filter.class);
+        multibinder.addBinding().toProvider(LocalDateMethodFactory.class).in(Singleton.class);
+        multibinder.addBinding().toProvider(DurationMethodFactoryProvider.class).in(Singleton.class);
+
+        final Multibinder<Template1> opMultibinder = Multibinder
+                .newSetBinder(binder(), Template1.class, Time.class);
+        opMultibinder.addBinding().to(Key.get(Template1.class, Self.class));
+        opMultibinder.addBinding().to(Key.get(Template1.class, Before.class));
+        opMultibinder.addBinding().to(Key.get(Template1.class, After.class));
+
+        // TODO addAll binding to the between factory
+    }
+
+    @Provides
+    @Singleton
+    @Before
+    Template1 beforeTemplate(final TemplateFactory templateFactory) {
+        return templateFactory.template1("{}Before");
+    }
+
+    @Provides
+    @Singleton
+    @After
+    Template1 afterTemplate(final TemplateFactory templateFactory) {
+        return templateFactory.template1("{}After");
+    }
+
+    @Provides
+    @Singleton
+    @Between
+    Template1 betweenTemplate(final TemplateFactory templateFactory) {
+        return templateFactory.template1("{}Between");
     }
 
 }

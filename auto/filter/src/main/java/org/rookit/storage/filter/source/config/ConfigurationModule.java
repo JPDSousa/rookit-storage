@@ -28,6 +28,7 @@ import com.google.inject.Singleton;
 import org.rookit.auto.config.ProcessorConfig;
 import org.rookit.storage.api.config.FilterConfig;
 import org.rookit.storage.api.config.StorageConfig;
+import org.rookit.utils.string.template.TemplateFactory;
 
 @SuppressWarnings("MethodMayBeStatic")
 public final class ConfigurationModule extends AbstractModule {
@@ -47,14 +48,14 @@ public final class ConfigurationModule extends AbstractModule {
 
     @Provides
     @Singleton
-    FilterConfig filterConfig(final StorageConfig config) {
+    FilterConfig filterConfig(final StorageConfig config, final TemplateFactory templateFactory) {
         final String name = "filter";
         return new FilterConfigImpl(
                 config.getProcessorConfig(name),
                 config.basePackage(),
-                config.partialEntityPrefix(),
-                name
-        );
+                config.partialEntityTemplate(),
+                name,
+                templateFactory);
     }
 
 }

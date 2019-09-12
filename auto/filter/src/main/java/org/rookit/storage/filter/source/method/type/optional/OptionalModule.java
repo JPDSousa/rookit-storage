@@ -23,9 +23,18 @@ package org.rookit.storage.filter.source.method.type.optional;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
-import org.rookit.auto.javapoet.method.TypeBasedMethodFactory;
-import org.rookit.storage.guice.filter.Filter;
+import com.squareup.javapoet.MethodSpec;
+import one.util.streamex.StreamEx;
+import org.rookit.convention.auto.javax.visitor.ConventionTypeElementVisitor;
+import org.rookit.storage.filter.source.guice.Any;
+import org.rookit.storage.filter.source.guice.No;
+import org.rookit.storage.filter.source.guice.Optional;
+import org.rookit.utils.string.template.Template1;
+import org.rookit.utils.string.template.TemplateFactory;
 
 @SuppressWarnings("MethodMayBeStatic")
 public final class OptionalModule extends AbstractModule {
@@ -38,16 +47,27 @@ public final class OptionalModule extends AbstractModule {
 
     private OptionalModule() {}
 
+    @SuppressWarnings({"AnonymousInnerClassMayBeStatic", "AnonymousInnerClass", "EmptyClass"})
     @Override
     protected void configure() {
-        final Multibinder<TypeBasedMethodFactory> multibinder = Multibinder.newSetBinder(binder(),
-                TypeBasedMethodFactory.class, Filter.class);
-        multibinder.addBinding().to(OptionalMethodFactory.class);
-        multibinder.addBinding().toProvider(OptionalShortProvider.class);
-        multibinder.addBinding().toProvider(OptionalIntProvider.class);
-        multibinder.addBinding().toProvider(OptionalLongProvider.class);
-        multibinder.addBinding().toProvider(OptionalDoubleProvider.class);
-        multibinder.addBinding().toProvider(OptionalBooleanProvider.class);
-        bind(PrimitiveOptionalFactory.class).to(PrimitiveOptionalFactoryImpl.class);
+        final Multibinder<ConventionTypeElementVisitor<StreamEx<MethodSpec>, Void>> optionalMFactories = Multibinder
+                .newSetBinder(binder(), new TypeLiteral<ConventionTypeElementVisitor<StreamEx<MethodSpec>, Void>>() {},
+                        Optional.class);
+        optionalMFactories.addBinding().toProvider(NoneMethodFactoryProvider.class);
+        optionalMFactories.addBinding().toProvider(SomeMethodFactoryProvider.class);
+    }
+
+    @Provides
+    @Singleton
+    @No
+    Template1 noTemplate(final TemplateFactory templateFactory) {
+        return templateFactory.template1("no{}");
+    }
+
+    @Provides
+    @Singleton
+    @Any
+    Template1 anyTemplate(final TemplateFactory templateFactory) {
+        return templateFactory.template1("any{}");
     }
 }

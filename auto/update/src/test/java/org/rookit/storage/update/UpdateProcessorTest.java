@@ -22,8 +22,8 @@
 package org.rookit.storage.update;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.rookit.auto.EntityProcessor;
-import org.rookit.auto.EntityProcessorTest;
+import org.rookit.auto.ExtendedProcessor;
+import org.rookit.auto.ExtendedProcessorTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -33,7 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @SuppressWarnings("JUnitTestCaseWithNoTests")
-public class UpdateProcessorTest implements EntityProcessorTest {
+public class UpdateProcessorTest implements ExtendedProcessorTest {
 
     private String configContent;
 
@@ -44,7 +44,7 @@ public class UpdateProcessorTest implements EntityProcessorTest {
     }
 
     @Override
-    public EntityProcessor processor() {
+    public ExtendedProcessor processor() {
         return new UpdateProcessor();
     }
 
